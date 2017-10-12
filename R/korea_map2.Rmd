@@ -1,0 +1,119 @@
+---
+title: "korea_v2"
+author: "coop711"
+date: '2017 9 20 '
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+
+```{r cars}
+library(maptools)
+library(ggplot2)
+library(rgdal)
+library(dplyr)
+library(broom)
+getwd()
+dsn <- "../data/CTPRVN_201703"
+shp1 <- readOGR(dsn, 
+                layer = "TL_SCCO_CTPRVN",
+                stringsAsFactors = FALSE,
+                encoding = "CP949")
+# map1 <- fortify(shp1)
+map1 <- tidy(shp1)
+shp1@data
+shp1$AB_name <- c("서울", "부산", "대구", "인천", "광주", "대전", "율산", "세종", "경기", "강원", "충북", "충남", "전북", "전남", "경북", "경남", "제주")
+shp1@data
+str(map1)
+dsn2 <- "../data/SIG_201703"
+shp2 <- readOGR(dsn2, 
+                layer = "TL_SCCO_SIG",
+                stringsAsFactors = FALSE,
+                encoding = "CP949")
+map2 <- fortify(shp2)
+nrow(map2)
+dsn3 <- "../data/EMD_201703"
+shp3 <- readOGR(dsn3, 
+                layer = "TL_SCCO_EMD",
+                stringsAsFactors = FALSE,
+                encoding = "CP949")
+map3 <- fortify(shp3)
+nrow(map3)
+dsn4 <- "../data/LI_201703"
+shp4 <- readOGR(dsn4, 
+                layer = "TL_SCCO_LI",
+                stringsAsFactors = FALSE,
+                encoding = "CP949")
+map4 <- fortify(shp4)
+nrow(map4)
+```
+
+## Plots
+
+You can also embed plots, for example:
+
+```{r maps, echo=FALSE}
+library(RColorBrewer)
+# fill.pal <- colorRampPalette(brewer.pal(8, "Accent"))(17)
+# pie(rep(1, 17), col = fill.pal)
+ggplot(data = map1, 
+       mapping = aes(x = long,
+                     y = lat,
+                     group = group)) +
+  geom_polygon(fill = "white",
+               colour = "black") +
+  coord_fixed() 
+#  scale_fill_manual(values = fill.pal)
+```
+
+## Simplified
+
+```{r}
+shp_simp <- readOGR(dsn = "../data/TL_SCCO_CTPRVN", 
+                    layer = "TL_SCCO_CTPRVN")
+shp_simp@data
+shp_simp@data <- shp1@data
+shp_simp@data
+names(shp_simp@data) <- c("code", "name_eng", "name_kor", "AB_name")
+shp_simp@data
+map_simp <- fortify(shp_simp)
+str(map_simp)
+shp_simp$id <- rownames(shp_simp@data)
+shp_simp@data
+map.merged <- merge(map_simp, shp_simp@data, by = "id")
+map.merged$region <- map.merged$code
+str(map.merged)
+map_df <- left_join(map_simp, shp_simp@data, c("id" = "id"))
+map_df$name_kor_f <- factor(map_df$name_kor, 
+                            levels = shp_simp$name_kor, 
+                            labels = shp_simp$AB_name)
+str(map_df)
+```
+
+```{r}
+ggplot(data = map_simp, 
+       mapping = aes(x = long,
+                     y = lat,
+                     group = group)) +
+  geom_polygon(fill = "white",
+               colour = "black") +
+  coord_fixed() 
+fill.pal <- colorRampPalette(brewer.pal(8, "Accent"))(17)
+ggplot(data = map_df, 
+       mapping = aes(x = long,
+                     y = lat,
+                     group = group,
+                     fill = name_kor_f)) +
+  geom_polygon() +
+#  geom_polygon(fill = "white",
+#               colour = "black") +
+  coord_fixed() +
+  theme(legend.text = element_text((family = "HCR Dotum LVT"))) +
+  guides(fill = guide_legend(title = NULL)) +
+  scale_fill_manual(name = "Province", values = fill.pal)
+```

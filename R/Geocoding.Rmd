@@ -1,0 +1,132 @@
+---
+title: "Geocoding"
+author: "coop711"
+date: '2017 9 11'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Geocoding, routes, distances
+
+### `geocode`
+
+```{r}
+library(ggmap)
+smith <- "Smith College, Northampton, MA 01063"
+home_cc_kr <- "강원도 춘천시 근화길15번길 26, 110동 901호"
+home_cc <- "26, Geunhwa-gil 15beon-gil, Chuncheon-si, Gangwon-do, South Korea"
+hallym_kr <- "강원도 춘천시 한림대학길 1, 한림대학교"
+hallym <- "1, Hallimdaehak-gil, Chuncheon-si, Gangwon-do, South Korea"
+bluehouse <- "청와대"
+cityhall <- "서울시청"
+bluehouse <- revgeocode(as.numeric(geocode(bluehouse)))
+cityhall <- revgeocode(as.numeric(geocode(cityhall)))
+geocode("Korea", source = "google")
+qmap("Seoul", 
+     zoom = 10,
+     maptype = "roadmap")
+qmap("Chuncheon", 
+     zoom = 10,
+     maptype = "roadmap")
+qmap("Hallym University", 
+     zoom = 15,
+     maptype = "roadmap")
+geocode(smith)
+geocode(home_cc) #>
+geocode(hallym) #>
+home_cc_gc <- geocode(home_cc)
+(home_cc_revgc <- revgeocode(as.numeric(home_cc_gc)))
+hallym_gc <- geocode(hallym)
+(hallym_revgc <- revgeocode(as.numeric(hallym_gc)))
+sapply(c(hallym_kr, hallym, home_cc_kr, home_cc), geocode)
+```
+
+### `mapdist`
+
+```{r}
+library(RgoogleMaps)
+amherst <- "Amherst College, Amherst, MA"
+getGeoCode(amherst)
+getGeoCode(home_cc)
+getGeoCode(hallym)
+mapdist(from = smith, to = amherst, mode = "driving")
+mapdist(from = smith, to = amherst, mode = "bicycling")
+mapdist(from = home_cc, to = hallym, mode = "walking") #> NA produced
+mapdist(from = home_cc_revgc, to = hallym_revgc) #> NA produced
+mapdist(from = bluehouse, to = cityhall) #> NA produced
+distQueryCheck()
+```
+
+### `route`
+
+```{r}
+library(tidyverse)
+(legs_df <- route(smith, amherst, alternatives = TRUE))
+head(legs_df) %>%
+  select(m, km, miles, seconds, minutes, hours, startLon, startLat)
+# (legs_df2 <- route(home_cc_revgc, hallym_revgc, alternatives = TRUE))
+# head(legs_df2) %>%
+#   select(m, km, miles, seconds, minutes, hours, startLon, startLat)
+```
+
+## `qmap`
+
+You can also embed plots, for example:
+
+```{r asp = 1}
+library(ggplot2)
+qmap("The Quarters, Hadley, MA",
+     zoom = 12, 
+     maptype = 'roadmap') +
+  geom_leg(data = legs_df,
+           mapping = aes(x = startLon, 
+                         y = startLat, 
+                         xend = endLon, 
+                         yend = endLat),
+           alpha = 3/4,
+           size = 2, 
+           colour = "blue")
+legs_df <- route(from = "736 Leonard St, Brooklyn, NY",
+                 to = "Citi Field, Roosevelt Ave, Flushing, NY",
+                 alternatives = TRUE,
+                 structure = "legs")
+qmap("74th St and Broadway, Queens, NY",
+     zoom = 12, 
+     maptype = 'roadmap') +
+  geom_leg(data = legs_df,
+           mapping = aes(x = startLon, 
+                         y = startLat, 
+                         xend = endLon, 
+                         yend = endLat,
+                         color = route),
+           alpha = 0.7,
+           size = 2)
+```
+
+## `leaflet` package,
+
+```{r}
+white_house <- geocode("The White House, Washington, DC")
+white_house
+library(leaflet)
+map <- leaflet() %>%
+  addTiles() %>%
+  addMarkers(data = white_house, lng = ~lon, lat = ~lat)
+map
+white_house <- white_house %>%
+  mutate(title = "The White House", 
+         address = "2600 Pennsylvania Ave")
+map %>%
+  addPopups(data = white_house,
+            lng = ~lon,
+            lat = ~lat,
+            popup = ~paste0("<b>", title, "</b></br>", address))
+```
+
+
+
+
+

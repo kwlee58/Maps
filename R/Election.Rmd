@@ -1,0 +1,28 @@
+---
+title: "Election"
+author: "coop711"
+date: '2017 9 13 '
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Election Results
+
+```{r}
+devtools::install_github("beanumber/fec", force = TRUE)
+library(fec)
+db <- src_mysql(default.file = "~/.my.cnf",
+                group = "rs-dbi",
+                dbname = "tmpDB",
+                user = "coop2711",
+                password = "local711")
+fec <- etl("fec", db, 
+           dir = "~/dumps/fec")
+us_elections <- tbl(fec, "house_elections") %>%
+  collect()
+```
+  
+ 

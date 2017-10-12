@@ -1,0 +1,198 @@
+---
+title: "Korea Map"
+author: "coop711"
+date: '2017 9 14 '
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## 시도
+
+대한민국 최신 행정구역 파일 (shp) 다운로드
+
+```{r}
+library(tidyverse)
+library(maptools)
+library(ggplot2)
+library(sp)
+library(rgdal)
+
+#< 대한민국 행정지도 파일을 제작, 관리하는 gisdeveloper 의 시도 행정구역 shp 파일 URL 저장, secure 하지 않은 주소 사용에 놀람.
+# gisdev <- "http://www.gisdeveloper.co.kr/download/admin_shp/CTPRVN_201703.zip"
+
+#< destfile 경로는 상대주소로 되어 있으나 
+# download.file(url = gisdev, 
+#              destfile = "./data/CTPRVN_201703.zip")
+
+#< data source name 설정
+# getwd()
+dsn <- "../data/CTPRVN_201703"
+
+#< dsn 에 들어있는 파일 리스트
+list.files(dsn)
+
+#< `rgdal` 의 `ogrListLayers()`
+ogrListLayers(dsn)
+
+#< `rgdal`의 `ogrInfo()`
+ogrInfo(dsn, layer = "TL_SCCO_CTPRVN")
+
+#< 한글문제와 자동 `factor` 변환문제로 인하여 두 가지 옵션 설정.
+korea_provin <- readOGR(dsn, 
+                        layer = "TL_SCCO_CTPRVN", 
+                        stringsAsFactors = FALSE, 
+                        encoding = "CP949")
+
+#< `korea_provin`의 `data` 슬롯에서 순서대로 6개 추출
+head(korea_provin@data)
+
+#< `data` 슬롯의 `class`  파악
+sapply(korea_provin@data, class)
+
+#< 변수명 확인
+names(korea_provin)
+names(korea_provin@data)
+
+#< `plot()`
+plot(korea_provin)
+
+#< `summary()`
+summary(korea_provin)
+
+#< 좌표체계 확인
+coordinates(korea_provin)
+
+#< `Proj4 metadata 확인
+proj4string(korea_provin)
+
+#< EPSG 코드 확인
+EPSG <- make_EPSG()
+EPSG[grepl("WGS 84$", EPSG$note), ]
+
+#< EPSG:4326 체계로 변환. 친숙한 경도/위도 체계로 나타남.
+korea_provin84 <- spTransform(korea_provin, CRS("+init=epsg:4326"))
+coordinates(korea_provin84)
+head(korea_provin84@data)
+
+#< 지도 다시 그리기
+plot(korea_provin84)
+korea_provin84@data
+library(tmap)
+qtm(shp = korea_provin84)
+pop_korea <- readRDS("./pop.RDs")
+Population <- pop_korea$Population
+korea_provin84$Population <- Population
+korea_provin84@data
+# korea_provin84@data <- left_join(korea_provin84@data, pop_korea, by = c("CTP_KOR_NM" = "Province"))
+# korea_provin84@data
+# korea_provin84$Population
+# library(extrafont)
+# par(family = "HCR Dotum LVT")
+qtm(korea_provin84, fill = "Population", text = "CTP_KOR_NM")
+```
+
+```{r ggmap way, eval = FALSE}
+(korea_coords <- as.data.frame(coordinates(korea_map)))
+head(korea_coords)
+str(korea_coords)
+names(korea_coords) <- c("coords.x1", "coords.x2")
+ggplot(korea_coords) +
+  geom_point(aes(x = coords.x1, y = coords.x2)) +
+  coord_quickmap()
+library(ggmap)
+m <- get_map("Seoul, Korea", zoom = 6, maptype = "roadmap")
+ggmap(m) +
+  geom_point(data = korea_coords,
+             mapping = aes(x = coords.x1,
+                           y = coords.x2),
+             size = 3)
+attr(m, "bb")
+proj4string(korea_map) %>% 
+  strwrap()
+korea_map_latlong <- korea_map %>%
+  spTransform(CRS("+init=epsg:4326"))
+bbox(korea_map_latlong)
+korea_latlong <- coordinates(korea_map_latlong)
+korea_latlong.df <- as.data.frame(korea_latlong)
+names(korea_latlong.df) <- c("coords.x1", "coords.x2")
+ggmap(m) +
+  geom_point(data = korea_latlong.df,
+             mapping = aes(x = coords.x1,
+                           y = coords.x2),
+             shape = 1,
+             size = 3) 
+#  scale_x_continuous(limits = c(124, 132)) +
+#  scale_y_continuous(limits = c(33, 39))
+# ggmap(m)
+```
+
+## 시군구
+
+```{r eval = FALSE}
+library(tidyverse)
+library(maptools)
+library(ggplot2)
+library(sp)
+library(rgdal)
+dsn <- "../data/SIG_201703"
+list.files(dsn)
+ogrListLayers(dsn)
+ogrInfo(dsn, layer = "TL_SCCO_SIG")
+korea_map <- readOGR(dsn, layer = "TL_SCCO_SIG", encoding = "CP949")
+showEPSG(proj4string(korea_map))
+summary(korea_map)
+str(coordinates(korea_map))
+as.data.frame(coordinates(korea_map))
+(korea_coords <- as.data.frame(coordinates(korea_map)))
+head(korea_coords)
+str(korea_coords)
+names(korea_coords) <- c("coords.x1", "coords.x2")
+ggplot(korea_coords) +
+  geom_point(aes(x = coords.x1, y = coords.x2)) +
+  coord_quickmap()
+library(ggmap)
+m1 <- get_map("Inje, Korea", zoom = 8, maptype = "roadmap")
+ggmap(m1)
+m <- get_map("Inje, Korea", zoom = 10, maptype = "roadmap")
+ggmap(m)
+ggmap(m) +
+  geom_point(data = korea_coords,
+             mapping = aes(x = coords.x1,
+                           y = coords.x2),
+             size = 3)
+attr(m, "bb")
+proj4string(korea_map) %>% 
+  strwrap()
+korea_map_latlong <- korea_map %>%
+  spTransform(CRS("+init=epsg:4326"))
+bbox(korea_map_latlong)
+korea_latlong <- coordinates(korea_map_latlong)
+korea_latlong.df <- as.data.frame(korea_latlong)
+names(korea_latlong.df) <- c("coords.x1", "coords.x2")
+ggmap(m) +
+  geom_polygon()
+  geom_polygon(data = korea_latlong.df,
+             mapping = aes(x = coords.x1,
+                           y = coords.x2,
+                           group = group))
+#  scale_x_continuous(limits = c(124, 132)) +
+#  scale_y_continuous(limits = c(33, 39))
+# ggmap(m)
+```
+```{r eval = FALSE}
+shp1 <- readShapePoly("../data/CTPRVN_201703/TL_SCCO_CTPRVN.shp")
+str(shp1)
+map1 <- fortify(shp1)
+str(map1)
+p <- ggplot(map1,
+            mapping = aes(x = long, 
+                          y = lat,
+                          group = group,
+                          fill = id)) +
+  geom_polygon() +
+  coord_fixed()
+p
+```
