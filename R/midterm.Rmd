@@ -1,0 +1,17 @@
+---
+title: "중간고사"
+author: "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  __________학과 학번__________ 이름__________"
+date: "2016-10-17"
+output: html_document
+---
+
+```{r, files, echo = FALSE}
+library(knitr)
+# file_1 <- c("VADeaths_midterm.Rmd")
+# file_2 <- "../../../SM201602/R/midterm_Team_Methods.Rmd"
+# file_3 <- "../../Wilkinson/R/midterm_Wilkinson_data.Rmd"
+# file.4 <- "../../Wilkinson/R/midterm_Wilkinson.Rmd"
+```
+
+```{r, child = c("VADeaths_midterm.Rmd", "SnowGIS_midterm.Rmd")}
+```

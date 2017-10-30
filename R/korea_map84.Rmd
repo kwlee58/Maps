@@ -21,7 +21,7 @@ library(broom) #> `tidy()`
 library(extrafont) #> "HCR Dotum LVT"
 # getwd()
 #> Data source Name
-dsn <- "../data/CTPRVN_201703"   
+dsn <- "../data/TL_SCCO_CTPRVN"   
 #> 시도 단위 지도 파일 읽어들이기. OGR : OpenGis simple features Reference implementation
 #> `stringsAsFactors = FALSE`를 설정하지 않으면 시도 이름이 `factor`로 자동 변환되면서 가나다 순으로 수준(`level`)이 매겨짐에 따라 `강원도, 경기도, ..., ` 순이 됨.
 #> `encoding = "CP949"`는 한글 인코딩 작업이 윈도우 시스템에서 이루어졌기 때문에 취해진 조치임. 윈도우에서 읽어들일 때는 `""`로 변경하거나 설정하지 않아도 됨.
@@ -34,7 +34,7 @@ shp1 <- readOGR(dsn,
 #                 stringsAsFactors = FALSE,
 #                 encoding = "CP949")
 # map1 <- fortify(shp1)
-dsn2 <- "../data/SIG_201703"
+dsn2 <- "../data/TL_SCCO_SIG"
 shp2 <- readOGR(dsn2, 
                 layer = "TL_SCCO_SIG",
                 stringsAsFactors = FALSE,
@@ -43,7 +43,7 @@ shp2 <- readOGR(dsn2,
 shp2@data
 map2 <- tidy(shp2)
 nrow(map2)
-dsn3 <- "../data/EMD_201703"
+dsn3 <- "../data/TL_SCCO_EMD"
 shp3 <- readOGR(dsn3, 
                 layer = "TL_SCCO_EMD",
                 stringsAsFactors = FALSE,
@@ -52,7 +52,7 @@ shp3 <- readOGR(dsn3,
 map3 <- tidy(shp3)
 str(map3)
 nrow(map3)
-dsn4 <- "../data/LI_201703"
+dsn4 <- "../data/TL_SCCO_LI"
 shp4 <- readOGR(dsn4, 
                 layer = "TL_SCCO_LI",
                 stringsAsFactors = FALSE,
@@ -251,5 +251,5 @@ ggplot(data = map_df,
 ## Save
 
 ```{r}
-save.image("./korea_map.RData")
+save.image("./korea_map_old.RData")
 ```

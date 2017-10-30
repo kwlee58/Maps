@@ -194,3 +194,23 @@ scale_fill_brewer(guide = FALSE,
                   direction = -1) +
 facet_grid(Gender ~ Place)
 ```
+
+### `position = "identity"`
+
+```{r}
+ggplot(data = VADeaths.df,
+              mapping = aes(x = interaction(Place, Gender), 
+                            y = Rates, 
+                            fill = Age)) +
+geom_bar(stat = "identity", 
+         position = "identity")
+```
+
+```{r}
+ggplot(data = VADeaths.df,
+              mapping = aes(x = interaction(Place, Gender), 
+                            y = rev(Rates), 
+                            fill = Age)) +
+geom_bar(stat = "identity", 
+         position = "identity")
+```
