@@ -41,7 +41,7 @@ shp2 <- readOGR(dsn2,
                 encoding = "CP949")
 # map2 <- fortify(shp2)
 shp2@data
-map2 <- tidy(shp2)
+map2 <- fortify(shp2)
 nrow(map2)
 dsn3 <- "../data/TL_SCCO_EMD"
 shp3 <- readOGR(dsn3, 
@@ -49,7 +49,7 @@ shp3 <- readOGR(dsn3,
                 stringsAsFactors = FALSE,
                 encoding = "CP949")
 # map3 <- fortify(shp3)
-map3 <- tidy(shp3)
+map3 <- fortify(shp3)
 str(map3)
 nrow(map3)
 dsn4 <- "../data/TL_SCCO_LI"
@@ -58,7 +58,7 @@ shp4 <- readOGR(dsn4,
                 stringsAsFactors = FALSE,
                 encoding = "CP949")
 # map4 <- fortify(shp4)
-map4 <- tidy(shp4)
+map4 <- fortify(shp4)
 nrow(map4)
 ```
 
