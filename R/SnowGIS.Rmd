@@ -99,13 +99,13 @@ spplot(CholeraDeaths)
 head(coordinates(CholeraDeaths), n = 20)
 data.frame(CholeraDeaths)[1:10, ]
 cholera_coords <- as.data.frame(coordinates(CholeraDeaths))
-(m0 <- ggplot(data = cholera_coords) + 
+m0 <- ggplot(data = cholera_coords) + 
   geom_point(aes(x = coords.x1,  ## figure 14.2 를 그리기 위한 전 단계
-                 y = coords.x2))) 
-(m1 <- m0 +  
-    coord_quickmap())  ## Figure 14.2 
-(m2 <- m0 + 
-    coord_map()) ## Not working
+                 y = coords.x2)) 
+m1 <- m0 +  
+  coord_quickmap()  ## Figure 14.2 
+m2 <- m0 + 
+  coord_map() ## Not working
 ```
 
 ### get_map, plot
@@ -113,16 +113,18 @@ cholera_coords <- as.data.frame(coordinates(CholeraDeaths))
 ```{r, get_map}
 # install.packages("ggmap", repos = "https://cran.rstudio.com")
 library(ggmap)
-# John_Snow_code <- geocode("John Snow, London, England", source = "dsk")
-# m <- get_map(John_Snow_code, 
+#> API 등록 필요함.
+register_google(key = "AIzaSyDJcbStksvQvqKctDqpWdu7r2qjccRTz4k")
+John_Snow_code <- geocode("John Snow, London, England", source = "google")
+m <- get_map(John_Snow_code, 
+             zoom = 17, 
+             source = "google",
+             maptype = "roadmap")
+# bbox <- c(-0.140, 51.509, -0.133, 51.518)
+# m <- get_map(bbox, 
 #              zoom = 17, 
 #              source = "google",
 #              maptype = "roadmap")
-bbox <- c(-0.140, 51.509, -0.133, 51.518)
-m <- get_map(bbox, 
-#             zoom = 17, 
-             source = "google",
-             maptype = "roadmap")
 class(m)
 plot(m)
 ```
@@ -210,7 +212,8 @@ snow <- ggmap(m) +
   geom_point(data = as.data.frame(cholera_latlong),
              aes(x = coords.x1,
                  y = coords.x2,
-                 size = Count))
+                 size = Count),
+             na.rm = TRUE)
 snow
 ```
 
@@ -227,7 +230,8 @@ snow +
              aes(x = coords.x1,
                  y = coords.x2,
                  size = 4, 
-                 colour = "red")) +
+                 colour = "red"),
+             na.rm = TRUE) +
 #  scale_colour_manual(guide = NULL)
   guides(colour = "none", shape = "none")
 ```
