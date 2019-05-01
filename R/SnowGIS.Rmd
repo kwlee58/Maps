@@ -114,7 +114,7 @@ m2 <- m0 +
 # install.packages("ggmap", repos = "https://cran.rstudio.com")
 library(ggmap)
 #> API 등록 필요함.
-register_google(key = "AIzaSyDJcbStksvQvqKctDqpWdu7r2qjccRTz4k")
+register_google(key = "AIzaSyCSMZiPy773hwHongwvCLRuXKRKInEehx8")
 John_Snow_code <- geocode("John Snow, London, England", source = "google")
 m <- get_map(John_Snow_code, 
              zoom = 17, 
